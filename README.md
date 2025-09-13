@@ -30,12 +30,11 @@ TaskFlow offers a to-do list feature set in a flow board interface, providing an
 - **Drag & Drop**: @dnd-kit for kanban functionality
 - **Build Tool**: Vite for fast development and building
 
-### Backend
+### Data Storage
 
-- **Runtime**: Node.js with Express.js
-- **Database**: Browser local storage
-- **Authentication**: No need to authenticate
-- **API**: RESTful API with input validation
+- **Storage**: Browser localStorage for persistence
+- **Data Export/Import**: JSON file format
+- **No Backend Required**: Pure frontend application
 
 ### Development & Deployment
 
@@ -43,12 +42,12 @@ TaskFlow offers a to-do list feature set in a flow board interface, providing an
 - **Testing**: Vitest + React Testing Library
 - **Linting**: ESLint + Prettier
 - **Type Checking**: TypeScript strict mode
-- **Deployment**: Docker containerization
+- **Deployment**: Static hosting (Netlify, Vercel, GitHub Pages)
 
 ## Prerequisites
 
 - Node.js 18+ and npm
-- Docker (optional, for containerized deployment)
+- Modern web browser with localStorage support
 
 ## Installation
 
@@ -62,22 +61,15 @@ cd taskflow
 ### 2. Install dependencies
 
 ```bash
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd ../backend
+# Install dependencies
 npm install
 ```
 
-### 3. Environment Setup
+### 3. Start development
 
 ```bash
-# Copy environment files
-cp .env.example .env
-
-# No environment configuration needed for local storage app
+# Start the development server
+npm run dev
 ```
 
 ## Development
@@ -85,18 +77,11 @@ cp .env.example .env
 ### Start the development server
 
 ```bash
-# Terminal 1: Start backend server
-cd backend
-npm run dev
-
-# Terminal 2: Start frontend development server
-cd frontend
+# Start the application
 npm run dev
 ```
 
 ### Available Scripts
-
-#### Frontend (`/frontend`)
 
 ```bash
 npm run dev          # Start development server
@@ -108,110 +93,126 @@ npm run lint         # Run ESLint
 npm run type-check   # Run TypeScript compiler check
 ```
 
-#### Backend (`/backend`)
-
-```bash
-npm run dev          # Start development server with hot reload
-npm run build        # Compile TypeScript to JavaScript
-npm run start        # Start production server
-npm run test         # Run tests
-```
-
 ## Project Structure
 
 ```bash
 taskflow/
-├── frontend/                 # React frontend application
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── stores/         # Zustand stores
-│   │   ├── utils/          # Utility functions
-│   │   ├── types/          # TypeScript type definitions
-│   │   └── api/            # API client functions
-│   ├── public/             # Static assets
-│   └── package.json
-├── backend/                 # Express.js backend API
-│   ├── src/
-│   │   ├── routes/         # API route handlers
-│   │   ├── middleware/     # Express middleware
-│   │   ├── models/         # Database models
-│   │   ├── services/       # Business logic
-│   │   ├── utils/          # Utility functions
-│   │   └── types/          # TypeScript type definitions
-│   ├── prisma/             # Database schema and migrations
-│   └── package.json
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── Board/          # Kanban board components
+│   │   ├── Task/           # Task-related components
+│   │   └── UI/             # Generic UI components
+│   ├── hooks/              # Custom React hooks
+│   ├── stores/             # Zustand stores for state management
+│   ├── utils/              # Utility functions
+│   │   ├── localStorage.ts # Local storage helpers
+│   │   └── export.ts       # Data export/import functions
+│   ├── types/              # TypeScript type definitions
+│   └── App.tsx             # Main application component
+├── public/                 # Static assets
 ├── docs/                   # Project documentation
-└── docker-compose.yml     # Docker configuration
+└── package.json            # Project configuration
 ```
 
-## API Documentation
+## Data Management
 
-### Authentication Endpoints
+### Local Storage Structure
 
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/logout` - User logout
+```typescript
+interface AppData {
+  board: {
+    id: string;
+    title: string;
+    columns: Column[];
+  };
+  tasks: Task[];
+  settings: {
+    theme: 'light' | 'dark';
+    autoSave: boolean;
+  };
+}
+```
 
-### Board Endpoints
+### Data Export/Import
 
-- `GET /api/boards` - Get user's boards
-- `POST /api/boards` - Create new board
-- `GET /api/boards/:id` - Get board by ID
-- `PUT /api/boards/:id` - Update board
-- `DELETE /api/boards/:id` - Delete board
+- **Export**: Download current board and tasks as JSON file
+- **Import**: Upload JSON file to restore board state
+- **Auto-save**: Automatically saves changes to localStorage
+- **Data persistence**: All data persists between browser sessions
 
-### Task Endpoints
-
-- `GET /api/boards/:boardId/tasks` - Get tasks for board
-- `POST /api/boards/:boardId/tasks` - Create new task
-- `PUT /api/tasks/:id` - Update task
-- `DELETE /api/tasks/:id` - Delete task
-- `PUT /api/tasks/:id/move` - Move task between columns
-
-## Database Schema
+## Data Types
 
 ### Core Entities
 
-- **Users**: Authentication and user profiles
-- **Boards**: Project/workflow containers
-- **Columns**: Kanban board columns (To Do, In Progress, Done, etc.)
-- **Tasks**: Individual work items with metadata
-- **BoardMembers**: User access control for boards
+```typescript
+interface Column {
+  id: string;
+  title: string;
+  position: number;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  columnId: string;
+  position: number;
+  priority: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  blocked: boolean;
+  completed: boolean;
+  tags: Tag[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+```
 
 ## Testing
 
 ### Running Tests
 
 ```bash
-# Frontend tests
-cd frontend && npm test
-
-# Backend tests
-cd backend && npm test
-
 # Run all tests
-npm run test:all
+npm test
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
 ### Test Coverage
 
 - Unit tests for components and utilities
-- Integration tests for API endpoints
-- E2E tests for critical user flows
+- Integration tests for user workflows
+- E2E tests for critical features
 
 ## Deployment
 
-### Using Docker
+### Static Hosting
 
 ```bash
-# Build and start all services
-docker-compose up --build
+# Build for production
+npm run build
 
-# Production deployment
-docker-compose -f docker-compose.prod.yml up -d
+# The dist/ folder contains the built application
+# Deploy to any static hosting service:
+# - Netlify
+# - Vercel
+# - GitHub Pages
+# - AWS S3
+```
+
+### Local Production Build
+
+```bash
+# Build and preview locally
+npm run build
+npm run preview
 ```
 
 ## Troubleshooting
