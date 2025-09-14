@@ -45,7 +45,12 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo and Title */}
           <div className="flex items-center">
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex items-center">
+              <img
+                src="/taskflow-logo.svg"
+                alt="TaskFlow"
+                className="h-8 w-8 mr-3"
+              />
               <h1 className="text-2xl font-bold text-gray-900">TaskFlow</h1>
             </div>
             <div className="ml-4 text-sm text-gray-600">
